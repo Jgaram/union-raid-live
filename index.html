@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>유니온 레이드 현황</title>
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --bg:#f6f7f9;--card:#fff;--fg:#1b1f24;--muted:#6b7480;--line:#e3e6ea;--accent:#3b6fe0;
+  --ok:#1f9d55;--warn:#c47f00;--bad:#d64545;--bar:#e9ecf0;
+  --c1:#3b6fe0;--c2:#e0703b;--c3:#2aa876;--c4:#a24ad6;--c5:#d6a12a;--c6:#d64577;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111418;--card:#1a1e24;--fg:#e6e9ee;--muted:#9aa3ad;--line:#2b313a;--accent:#6e95f0;
+  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;
+  --c1:#6e95f0;--c2:#f08e5e;--c3:#4cc995;--c4:#bf7cf0;--c5:#e8c051;--c6:#f0709a;}}
+:root[data-theme="dark"]{
+  --bg:#111418;--card:#1a1e24;--fg:#e6e9ee;--muted:#9aa3ad;--line:#2b313a;--accent:#6e95f0;
+  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;
+  --c1:#6e95f0;--c2:#f08e5e;--c3:#4cc995;--c4:#bf7cf0;--c5:#e8c051;--c6:#f0709a;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0}
+h2{font-size:15px;margin:0 0 10px}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-bottom:14px}
+.muted{color:var(--muted)}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid currentColor}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.bosses{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.boss{border:1px solid var(--line);border-radius:8px;padding:10px;border-top:4px solid var(--bc)}
+.boss .nm{font-weight:600;font-size:13px}
+.hpbar{height:8px;background:var(--bar);border-radius:4px;overflow:hidden;margin:6px 0}
+.hpbar i{display:block;height:100%;background:var(--bc)}
+.row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.seg button{background:none;border:0;color:var(--fg);padding:5px 12px;cursor:pointer;font:inherit}
+.seg button.on{background:var(--accent);color:#fff}
+.chartwrap{position:relative;height:320px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+th{cursor:pointer;user-select:none;font-size:12px;color:var(--muted);font-weight:600}
+tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+tbody tr{cursor:pointer}
+.feed{max-height:420px;overflow-y:auto}
+.ev{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;align-items:center}
+.ev .t{color:var(--muted);width:72px;flex:none;font-size:12px}
+.ev .m{width:64px;flex:none;font-weight:600}
+.ev .b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev .d{flex:none;font-weight:600}
+.ev.gone{opacity:.5}.ev.gone .d{text-decoration:line-through}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
+.chips span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:1px 8px;margin:2px;font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}.chartwrap{height:260px}}
+#err{display:none}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1 id="title">유니온 레이드 하드</h1>
+    <span id="upd" class="muted">불러오는 중…</span>
+    <span id="stat"></span>
+  </div>
+  <div id="err" class="card bad"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="card">
+    <h2>보스 현황</h2>
+    <div class="bosses" id="bosses"></div>
+  </section>
+
+  <section class="card">
+    <h2>시간별 누적 대미지</h2>
+    <div class="seg" id="mode">
+      <button data-v="boss" class="on">보스별</button><button data-v="member">멤버별</button><button data-v="total">전체</button>
+    </div>
+    <div class="chartwrap"><canvas id="chart"></canvas></div>
+    <p class="muted" style="font-size:12px;margin:8px 0 0">시각은 5분 간격 수집 시각 기준이라 실제 공격 시각과 최대 5분 차이 납니다. 휠·핀치로 확대는 되지 않고, 범례를 눌러 선을 켜고 끌 수 있습니다.</p>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>멤버별 <span class="muted" style="font-weight:400;font-size:12px">— 줄을 누르면 피드가 그 멤버만 보여요</span></h2>
+      <div class="tbl"><table id="mt"></table></div>
+    </section>
+    <section class="card">
+      <h2>실시간 피드 <span id="feedf" class="muted" style="font-weight:400;font-size:12px"></span></h2>
+      <div class="feed" id="feed"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>하드 미참여 <span class="muted" style="font-weight:400;font-size:12px">(이번 시즌 기록이 있는 멤버 기준)</span></h2>
+    <div class="chips" id="idle"></div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const REPO = "Jgaram/union-raid-live", BRANCH = "data";
+const SOURCES = [
+  () => fetch(`https://api.github.com/repos/${REPO}/contents/data.json?ref=${BRANCH}`,
+              {headers:{Accept:"application/vnd.github.raw+json"}, cache:"no-cache"}),
+  () => fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/data.json?t=${Date.now()}`, {cache:"no-store"}),
+];
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) SOURCES.unshift(() => fetch(`data.json?t=${Date.now()}`));  // 로컬 미리보기
+const REFRESH_MS = 120000;
+const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6"];
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const $ = id => document.getElementById(id);
+
+let D = null, mode = "boss", selMember = null, sortKey = "total", sortDir = -1, chart = null;
+
+function fmt(n){
+  if (n == null) return "-";
+  const a = Math.abs(n);
+  const trim = s => s.includes(".") ? s.replace(/\.?0+$/,"") : s;
+  if (a >= 1e12) return trim((n/1e12).toFixed(2)) + "조";
+  if (a >= 1e8) return trim((n/1e8).toFixed(a >= 1e10 ? 0 : 2)) + "억";
+  if (a >= 1e4) return Math.round(n/1e4).toLocaleString() + "만";
+  return n.toLocaleString();
+}
+const pad = n => String(n).padStart(2,"0");
+function tstr(t, withDate){
+  const d = new Date(t*1000);
+  return (withDate ? `${d.getMonth()+1}/${d.getDate()} ` : "") + `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function load(){
+  let lastErr;
+  for (const src of SOURCES){
+    try { const r = await src(); if (r.ok) return await r.json(); lastErr = `HTTP ${r.status}`; }
+    catch(e){ lastErr = e.message; }
+  }
+  throw new Error(lastErr);
+}
+
+function bossOrder(){ return Object.keys(D.bosses); }
+function bossColor(id){ return css(COLORS[bossOrder().indexOf(id) % COLORS.length]); }
+const live = () => D.events.filter(e => !e.gone);   // 현재 응답에 남아 있는 기록 = 실제 반영된 딜
+
+function render(){
+  const diffName = D.difficulty === 2 ? "하드" : "노멀(테스트)";
+  $("title").textContent = `유니온 레이드 ${diffName}`;
+  document.title = `유니온 레이드 ${diffName}`;
+  const ago = Math.round((Date.now()/1000 - D.checked)/60);
+  $("upd").textContent = `마지막 수집 ${tstr(D.checked, true)} (${ago}분 전)`;
+  const st = D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
+  $("stat").innerHTML = `<span class="badge ${st[0]}" title="${esc(D.status)}">${st[1]}</span>`;
+
+  const ev = live(), total = ev.reduce((s,e)=>s+e.dmg,0);
+  const active = new Set(ev.map(e=>e.m));
+  const lastHp = D.hp[D.hp.length-1];
+  $("kpis").innerHTML = [
+    [fmt(total), "총 대미지"], [ev.length, "기록 수"],
+    [`${active.size} / ${D.members.length}`, "참여 멤버"],
+    [lastHp ? `Lv.${lastHp.lv}` : "-", "현재 레벨"],
+  ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("");
+
+  $("bosses").innerHTML = bossOrder().map(id=>{
+    const b = D.bosses[id], cur = lastHp?.hp[id], dealt = ev.filter(e=>e.b===id).reduce((s,e)=>s+e.dmg,0);
+    const pct = b.max_hp && cur != null ? cur/b.max_hp*100 : null;
+    return `<div class="boss" style="--bc:${bossColor(id)}"><div class="nm">${esc(b.name)}</div>
+      <div class="hpbar"><i style="width:${pct??0}%"></i></div>
+      <div class="row"><span>HP ${pct==null?"-":pct.toFixed(1)+"%"}</span><span>${fmt(cur)} / ${fmt(b.max_hp)}</span></div>
+      <div class="row"><span>누적 딜</span><span>${fmt(dealt)} · ${ev.filter(e=>e.b===id).length}회</span></div></div>`;
+  }).join("");
+
+  renderChart(); renderTable(); renderFeed();
+  const idle = D.members.filter(m=>!active.has(m));
+  $("idle").innerHTML = idle.length ? idle.map(m=>`<span>${esc(m)}</span>`).join("") : `<span class="muted">모두 참여</span>`;
+}
+
+// 누적 계열: 기록이 생기면 +, 응답에서 사라지면(덮어쓰기) − 로 계단형 시계열을 만든다.
+function series(keyFn){
+  const steps = {};
+  for (const e of D.events){
+    const k = keyFn(e); (steps[k] ||= []).push([e.t, e.dmg]);
+    if (e.gone) steps[k].push([e.gone, -e.dmg]);
+  }
+  const out = {};
+  for (const [k, arr] of Object.entries(steps)){
+    arr.sort((a,b)=>a[0]-b[0]);
+    let s = 0; const pts = [];
+    for (const [t,d] of arr){ s += d; if (pts.length && pts[pts.length-1].x === t*1000) pts[pts.length-1].y = s; else pts.push({x:t*1000, y:s}); }
+    pts.push({x: D.checked*1000, y: s});
+    out[k] = pts;
+  }
+  return out;
+}
+
+function renderChart(){
+  let sets;
+  if (mode === "boss"){
+    const s = series(e=>e.b);
+    sets = bossOrder().filter(id=>s[id]).map(id=>({label:D.bosses[id].name, data:s[id], borderColor:bossColor(id), backgroundColor:bossColor(id)}));
+  } else if (mode === "member"){
+    const s = series(e=>e.m);
+    const ranked = Object.keys(s).sort((a,b)=>s[b].at(-1).y - s[a].at(-1).y);
+    sets = ranked.map((m,i)=>({label:m, data:s[m], hidden: selMember ? m!==selMember : i>=8,
+      borderColor:css(COLORS[i%COLORS.length]), backgroundColor:css(COLORS[i%COLORS.length])}));
+  } else {
+    const s = series(()=>"all");
+    sets = [{label:"전체", data:s.all||[], borderColor:css("--accent"), backgroundColor:css("--accent")}];
+  }
+  sets.forEach(d=>Object.assign(d,{stepped:true, pointRadius:2, borderWidth:2, fill:false}));
+  const grid = css("--line"), muted = css("--muted");
+  if (chart) chart.destroy();
+  chart = new Chart($("chart"), {
+    type:"line", data:{datasets:sets},
+    options:{responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:"nearest", intersect:false},
+      scales:{
+        x:{type:"linear", grid:{color:grid}, ticks:{color:muted, maxTicksLimit:8, callback:v=>tstr(v/1000)}},
+        y:{grid:{color:grid}, ticks:{color:muted, callback:v=>fmt(v)}, beginAtZero:true}},
+      plugins:{legend:{labels:{color:css("--fg"), boxWidth:12}},
+        tooltip:{callbacks:{title:it=>tstr(it[0].parsed.x/1000,true), label:it=>`${it.dataset.label}: ${fmt(it.parsed.y)}`}}}}
+  });
+}
+
+function renderTable(){
+  const ids = bossOrder(), rows = {};
+  for (const m of D.members) rows[m] = {m, n:0, total:0, ...Object.fromEntries(ids.map(i=>[i,0]))};
+  for (const e of live()){ const r = rows[e.m] ||= {m:e.m,n:0,total:0}; r.n++; r.total += e.dmg; r[e.b] = (r[e.b]||0) + e.dmg; }
+  const list = Object.values(rows).sort((a,b)=> sortKey==="m" ? sortDir*a.m.localeCompare(b.m) : sortDir*((a[sortKey]||0)-(b[sortKey]||0)));
+  const head = [["#",null],["멤버","m"],["횟수","n"],["총 대미지","total"], ...ids.map(i=>[D.bosses[i].name.replace(/\s*\[.*\]/,""), i])];
+  $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${k??""}">${esc(h)}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
+    <tbody>${list.map((r,i)=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""}"><td>${i+1}</td><td>${esc(r.m)}</td><td>${r.n}</td><td>${fmt(r.total)}</td>${ids.map(id=>`<td>${r[id]?fmt(r[id]):""}</td>`).join("")}</tr>`).join("")}</tbody>`;
+}
+
+function renderFeed(){
+  const ev = D.events.filter(e=>!selMember || e.m===selMember).slice().sort((a,b)=>b.t-a.t);
+  $("feedf").innerHTML = selMember ? `— ${esc(selMember)} <a href="#" id="clr">전체 보기</a>` : "";
+  $("feed").innerHTML = ev.length ? ev.map(e=>`<div class="ev ${e.gone?"gone":""}" style="--bc:${bossColor(e.b)}" title="${e.gone?"이후 더 높은 기록으로 갱신됨":""}">
+      <span class="t">${e.pre?"시작 전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
+      <span class="b"><span class="dot"></span>${esc(D.bosses[e.b]?.name||e.b)}${e.fh?" 🎯":""}</span>
+      <span class="d">${fmt(e.dmg)}</span></div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
+  $("clr")?.addEventListener("click", ev=>{ev.preventDefault(); selMember=null; renderTable(); renderFeed(); if(mode==="member") renderChart();});
+}
+
+$("mode").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if (!b) return;
+  mode = b.dataset.v; [...$("mode").children].forEach(x=>x.classList.toggle("on", x===b)); renderChart();
+});
+$("mt").addEventListener("click", e=>{
+  const th = e.target.closest("th");
+  if (th){ const k = th.dataset.k; if (!k) return; sortDir = k===sortKey ? -sortDir : (k==="m"?1:-1); sortKey = k; renderTable(); return; }
+  const tr = e.target.closest("tr[data-m]"); if (!tr) return;
+  selMember = selMember===tr.dataset.m ? null : tr.dataset.m; renderTable(); renderFeed(); if (mode==="member") renderChart();
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>D && render());
+
+async function tick(){
+  try { D = await load(); $("err").style.display="none"; render(); }
+  catch(e){ $("err").style.display="block"; $("err").textContent = `데이터를 불러오지 못했어요: ${e.message}`; }
+}
+tick(); setInterval(tick, REFRESH_MS);
+</script>
+</body>
+</html>
