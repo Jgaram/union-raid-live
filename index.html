@@ -234,7 +234,7 @@ function renderAll(){
   $("upd").textContent = `마지막 수집 ${tstr(D.checked, true)} (${ago}분 전)`;
   const st = D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
   $("stat").innerHTML = `<span class="badge ${st[0]}" title="${esc(D.status)}">${st[1]}</span>`;
-  NAMES = [...new Set(Object.values(D.bosses).map(b => b.name))];
+  NAMES = [...new Set(Object.values(D.bosses).sort((a,b)=>(a.step??9)-(b.step??9)).map(b => b.name))];
   setupSlider(); buildHpChart(); buildDmgChart(); renderAt();
 }
 
@@ -260,12 +260,12 @@ function renderAt(){
 
   // 보스 카드
   $("bossh").textContent = curLv ? `— Lv.${curLv}` : "";
-  const ids = snap ? Object.keys(snap.hp) : [];
+  const ids = snap ? Object.keys(snap.hp).sort((a,b)=>NAMES.indexOf(nameOf(a))-NAMES.indexOf(nameOf(b))) : [];
   $("bosses").innerHTML = ids.length ? ids.map(id=>{
     const name = nameOf(id), cur = snap.hp[id], mx = maxOf(snap,id), pct = mx ? cur/mx*100 : 0;
     const mine = ev.filter(e=>nameOf(e.b)===name), atLv = mine.filter(e=>e.lv===curLv);
     return `<div class="boss ${cur===0?"dead":""}" style="--bc:${colorOf(name)}">
-      <div class="nm"><span>${esc(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
+      <div class="nm"><span>${D.bosses[id]?.step ? D.bosses[id].step + "번 · " : ""}${esc(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
       <div class="hpbar"><i style="width:${pct}%"></i></div>
       <div class="row"><span>남은 HP</span><span>${fmt(cur)} / ${fmt(mx)}</span></div>
       <div class="row"><span>이번 레벨</span><span>${atLv.length}회 · ${fmt(atLv.reduce((s,e)=>s+e.dmg,0))}</span></div>
@@ -384,7 +384,7 @@ function renderFeed(ev, t){
       ? `<div class="ev lvup">▲ Lv.${lv - 1} 클리어 → Lv.${lv} 시작</div>`
       : `<div class="ev ${e.gone && e.gone <= t ?"gone":""} ${e.t > t - STEP ? "new" : ""}" style="--bc:${colorOf(nameOf(e.b))}" title="${e.gone && e.gone<=t?"이후 같은 멤버의 더 높은 기록으로 갱신됨":""}">
       <span class="t">${e.pre?"이전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
-      <span class="b"><span class="dot"></span>Lv.${e.lv} ${esc(short(nameOf(e.b)))}${e.fh?" 🎯":""}</span>
+      <span class="b"><span class="dot"></span>Lv.${e.lv} ${esc(short(nameOf(e.b)))}${e.fh?` <b class="ok">🎯막타</b>`:""}</span>
       <span class="d">${fmt(e.dmg)}</span></div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
   $("clr")?.addEventListener("click", x=>{x.preventDefault(); selMember=null; renderAt(); if(mode==="member") buildDmgChart();});
 }
