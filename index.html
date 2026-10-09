@@ -82,13 +82,18 @@ th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 th{cursor:pointer;user-select:none;font-size:12px;color:var(--muted);font-weight:600}
 tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 tbody tr{cursor:pointer}
-.feed{max-height:440px;overflow-y:auto}
+.feed{max-height:600px;overflow-y:auto}
 .ev{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;align-items:center}
 .ev .t{color:var(--muted);width:46px;flex:none;font-size:12px}
 .ev .m{width:58px;flex:none;font-weight:600}
 .ev .b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ev .d{flex:none;font-weight:600}
 .ev.gone .d{text-decoration:line-through;opacity:.6}
+.ev{flex-wrap:wrap;row-gap:4px}
+.sq{flex-basis:100%;display:flex;gap:4px;padding-left:114px}
+.sq img,.sq span{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--bar);object-fit:cover}
+.sq span{display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);overflow:hidden}
+@media (max-width:760px){.sq{padding-left:56px}}
 .ev.new{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .ev.lvup{justify-content:center;color:var(--accent);font-weight:600;font-size:12px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
@@ -106,7 +111,7 @@ tbody tr{cursor:pointer}
     <span id="win" style="font-weight:600"></span>
     <span id="upd" class="muted">불러오는 중…</span>
     <span id="stat"></span>
-    <button class="tb-btn theme" id="theme" title="화면 테마 바꾸기">자동</button>
+    <button class="tb-btn theme" id="theme">◐</button>
   </div>
   <div id="err" class="card bad"></div>
   <div id="demo" class="card demo">
@@ -395,6 +400,12 @@ function renderTable(ev){
       : `<tr><td colspan="${head.length}" class="muted" style="text-align:left">아직 기록이 없어요.</td></tr>`}</tbody>`;
 }
 
+// 스쿼드 얼굴 (thumbs/<캐릭터 id>.webp). 이름은 마우스를 올리면 보인다.
+function squad(e){
+  if (!e.sq?.length) return "";
+  return `<div class="sq">${e.sq.map(r => { const n = D.chars?.[r];
+    return n ? `<img src="thumbs/${r}.webp" alt="${esc(n)}" title="${esc(n)}" loading="lazy">` : `<span title="알 수 없는 캐릭터 ${r}">?</span>`; }).join("")}</div>`;
+}
 function renderFeed(ev, t){
   const items = ev.filter(e=>!selMember || e.m===selMember).map(e=>({t:e.t, e}));
   if (!selMember) for (const u of levelUps().slice(1)) if (u.t <= t) items.push({t:u.t, lv:u.lv});
@@ -405,7 +416,7 @@ function renderFeed(ev, t){
       : `<div class="ev ${e.gone && e.gone <= t ?"gone":""} ${e.t > t - STEP ? "new" : ""}" style="--bc:${colorOf(nameOf(e.b))}" title="${e.gone && e.gone<=t?"이후 같은 멤버의 더 높은 기록으로 갱신됨":""}">
       <span class="t">${e.pre?"이전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
       <span class="b">Lv.${e.lv} ${bossLabel(nameOf(e.b))}${e.fh?` <b class="ok">🎯막타</b>`:""}</span>
-      <span class="d">${fmt(e.dmg)}</span></div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
+      <span class="d">${fmt(e.dmg)}</span>${squad(e)}</div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
   $("clr")?.addEventListener("click", x=>{x.preventDefault(); selMember=null; renderAt();});
 }
 
@@ -422,7 +433,10 @@ let theme = "auto";
 try { theme = localStorage.getItem("theme") || "auto"; } catch {}
 function applyTheme(){
   if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme;
-  $("theme").textContent = (theme === "dark" ? "☾ " : theme === "light" ? "☀ " : "◐ ") + THEMES.find(x=>x[0]===theme)[1];
+  const label = THEMES.find(x=>x[0]===theme)[1];
+  $("theme").textContent = theme === "dark" ? "☾" : theme === "light" ? "☀" : "◐";
+  $("theme").title = `테마: ${label} (눌러서 바꾸기)`;
+  $("theme").setAttribute("aria-label", $("theme").title);
   if (D) renderAll();   // 그래프 색은 그릴 때 읽으므로 다시 그린다
 }
 $("theme").onclick = () => {
