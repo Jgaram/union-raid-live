@@ -7,18 +7,22 @@
 <meta name="robots" content="noindex">
 <style>
 :root{
-  --bg:#f6f7f9;--card:#fff;--fg:#1b1f24;--muted:#6b7480;--line:#e3e6ea;--accent:#3b6fe0;
-  --ok:#1f9d55;--warn:#c47f00;--bad:#d64545;--bar:#e9ecf0;--cursor:#1b1f24;
-  --c1:#3b6fe0;--c2:#e0703b;--c3:#2aa876;--c4:#a24ad6;--c5:#d6a12a;--c6:#d64577;
+  color-scheme:light;
+  --bg:#f6f7f9;--card:#fff;--fg:#1b1f24;--muted:#5f6873;--line:#e3e6ea;--grid:#eceef1;--accent:#3b6fe0;
+  --ok:#1f9d55;--warn:#b57500;--bad:#d64545;--bar:#e9ecf0;--cursor:#1b1f24;
+  /* 속성 색 (그래프 선·HP 막대) — 보스의 약점 속성 */
+  --e-fire:#e0452f;--e-water:#2f7fe0;--e-wind:#1fa36a;--e-electric:#9b4fd8;--e-iron:#c99500;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111418;--card:#1a1e24;--fg:#e6e9ee;--muted:#9aa3ad;--line:#2b313a;--accent:#6e95f0;
-  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;--cursor:#e6e9ee;
-  --c1:#6e95f0;--c2:#f08e5e;--c3:#4cc995;--c4:#bf7cf0;--c5:#e8c051;--c6:#f0709a;}}
+  color-scheme:dark;
+  --bg:#0e1116;--card:#1a1f27;--fg:#eef1f5;--muted:#b3bcc7;--line:#38404b;--grid:#2a313b;--accent:#7ea2ff;
+  --ok:#4fd68a;--warn:#f2b84b;--bad:#ff7a7a;--bar:#2e3540;--cursor:#ffffff;
+  --e-fire:#ff6b55;--e-water:#5aa6ff;--e-wind:#3fd593;--e-electric:#c487ff;--e-iron:#ffcb3d;}}
 :root[data-theme="dark"]{
-  --bg:#111418;--card:#1a1e24;--fg:#e6e9ee;--muted:#9aa3ad;--line:#2b313a;--accent:#6e95f0;
-  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;--cursor:#e6e9ee;
-  --c1:#6e95f0;--c2:#f08e5e;--c3:#4cc995;--c4:#bf7cf0;--c5:#e8c051;--c6:#f0709a;}
+  color-scheme:dark;
+  --bg:#0e1116;--card:#1a1f27;--fg:#eef1f5;--muted:#b3bcc7;--line:#38404b;--grid:#2a313b;--accent:#7ea2ff;
+  --ok:#4fd68a;--warn:#f2b84b;--bad:#ff7a7a;--bar:#2e3540;--cursor:#ffffff;
+  --e-fire:#ff6b55;--e-water:#5aa6ff;--e-wind:#3fd593;--e-electric:#c487ff;--e-iron:#ffcb3d;}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif}
 main{max-width:1100px;margin:0 auto;padding:0 16px 16px}
@@ -46,7 +50,7 @@ select.tb-btn{padding:4px 6px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
 .kpi span{font-size:12px;color:var(--muted)}
-.bosses{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bosses{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
 .boss{border:1px solid var(--line);border-left:4px solid var(--bc);border-radius:8px;padding:8px 10px}
 .boss .nm{font-weight:600;font-size:13px;display:flex;justify-content:space-between;gap:6px}
 .boss.dead{opacity:.55}
@@ -56,6 +60,15 @@ select.tb-btn{padding:4px 6px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
 .seg button{background:none;border:0;color:var(--fg);padding:5px 12px;cursor:pointer;font:inherit}
 .seg button.on{background:var(--accent);color:#fff}
+.ei{width:18px;height:18px;vertical-align:-4px;flex:none;margin-left:4px}
+.nm .ei{width:20px;height:20px;vertical-align:-5px;margin-left:4px}
+th .ei{width:20px;height:20px;vertical-align:middle;margin:0}
+.legend .ei{margin:0}
+.legend{display:flex;gap:6px;margin-bottom:8px}
+.legend button{background:none;border:1px solid var(--line);border-radius:8px;padding:4px;cursor:pointer;line-height:0}
+.legend button.off{opacity:.3}
+.legend .ei{width:24px;height:24px}
+.theme{margin-left:auto}
 .chartwrap{position:relative;height:300px}
 .chartwrap canvas{cursor:crosshair}
 .note{font-size:12px;color:var(--muted);margin:8px 0 0}
@@ -79,7 +92,7 @@ tbody tr{cursor:pointer}
 .ev.new{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .ev.lvup{justify-content:center;color:var(--accent);font-weight:600;font-size:12px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
-.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.grid2{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:14px}
 @media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}.chartwrap{height:240px}.tb-hide{display:none}}
 #err,#demo{display:none}
 .demo{border:2px solid var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--card))}
@@ -93,6 +106,7 @@ tbody tr{cursor:pointer}
     <span id="win" style="font-weight:600"></span>
     <span id="upd" class="muted">불러오는 중…</span>
     <span id="stat"></span>
+    <button class="tb-btn theme" id="theme" title="화면 테마 바꾸기">자동</button>
   </div>
   <div id="err" class="card bad"></div>
   <div id="demo" class="card demo">
@@ -120,17 +134,10 @@ tbody tr{cursor:pointer}
 
   <section class="card">
     <h2>보스 체력 변화 <small>— 그래프를 누르면 그 시점으로 이동</small></h2>
+    <div class="legend" id="legend"></div>
     <div class="chartwrap"><canvas id="hpchart"></canvas></div>
     <div class="levels" id="levels"></div>
-  </section>
-
-  <section class="card">
-    <h2>누적 대미지 <small>— 그래프를 누르면 그 시점으로 이동</small></h2>
-    <div class="seg" id="mode">
-      <button data-v="boss" class="on">보스별</button><button data-v="member">멤버별</button><button data-v="total">전체</button>
-    </div>
-    <div class="chartwrap"><canvas id="chart"></canvas></div>
-    <p class="note">시각은 5분 간격 수집 시각 기준이라 실제 공격과 최대 5분 차이 납니다. 범례를 눌러 선을 켜고 끌 수 있어요.</p>
+    <p class="note">아이콘은 보스의 약점 속성이에요. 눌러서 선을 켜고 끌 수 있어요. 시각은 5분 간격 수집 기준이라 실제 공격과 최대 5분 차이 납니다.</p>
   </section>
 
   <div class="grid2">
@@ -159,12 +166,16 @@ const FORCE_DEMO = new URLSearchParams(location.search).has("demo");
 let DEMO = FORCE_DEMO;
 if (FORCE_DEMO) SOURCES.splice(0, SOURCES.length, () => fetch("demo.json"));
 const REFRESH_MS = 120000, STEP = 300;
-const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6"];
+// 보스 속성 id → 코드, 그리고 그 코드의 약점(유리한 코드). 화면엔 약점 속성만 쓴다.
+const ELEM = {"100001":"fire","200001":"water","300001":"wind","400001":"electric","500001":"iron"};
+const WEAK = {fire:"water", water:"electric", wind:"fire", electric:"iron", iron:"wind"};
+const ELEM_KO = {fire:"작열", water:"수냉", wind:"풍압", electric:"전격", iron:"철갑"};
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const $ = id => document.getElementById(id);
 
-let D = null, T = null /* null = 실시간 */, mode = "boss", selMember = null, sortKey = "total", sortDir = -1;
-let hpChart = null, dmgChart = null, playTimer = null;
+let D = null, T = null /* null = 실시간 */, selMember = null, sortKey = "total", sortDir = -1;
+let hpChart = null, playTimer = null;
+const hidden = new Set();   // 그래프에서 끈 보스 이름
 
 // ── 형식 ──
 function fmt(n){
@@ -186,8 +197,15 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">"
 // ── 데이터 도우미 (보스는 레벨마다 id가 바뀔 수 있어서 이름으로 묶는다) ──
 const nameOf = id => D.bosses[id]?.name ?? id;
 let NAMES = [];
-const colorOf = name => css(COLORS[Math.max(0, NAMES.indexOf(name)) % COLORS.length]);
 const short = n => n.replace(/\s*\[.*\]/, "");
+const weakOf = name => { const b = Object.values(D.bosses).find(b => b.name === name); return WEAK[ELEM[b?.element]]; };
+const colorOf = name => css(`--e-${weakOf(name)}`) || css("--muted");
+function icon(name){
+  const w = weakOf(name); if (!w) return "";
+  return `<img class="ei" src="icons/${w}.png" alt="${ELEM_KO[w]}" title="${esc(short(name))} · 약점 ${ELEM_KO[w]}">`;
+}
+const bossLabel = name => `${esc(short(name))}${icon(name)}`;   // [H.S.T.A.] 같은 코드명 대신 약점 아이콘
+const lvOf = (m, ev) => { for (let i = ev.length - 1; i >= 0; i--) if (ev[i].m === m && ev[i].slv) return ev[i].slv; return null; };
 // 하드 창 (05:00 ~ 다음날 05:00 KST). 그래프와 슬라이더는 이 24시간에 고정한다.
 const t0 = () => D.window?.start ?? Math.min(D.hp[0]?.t ?? D.checked, D.events[0]?.t ?? D.checked);
 const tEnd = () => D.window?.end ?? D.checked;
@@ -252,7 +270,7 @@ function renderAll(){
   const st = DEMO ? ["warn","가짜 데이터"] : D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
   $("stat").innerHTML = `<span class="badge ${st[0]}" title="${esc(D.status)}">${st[1]}</span>`;
   NAMES = [...new Set(Object.values(D.bosses).sort((a,b)=>(a.step??9)-(b.step??9)).map(b => b.name))];
-  setupSlider(); buildHpChart(); buildDmgChart(); renderAt();
+  setupSlider(); buildHpChart(); renderAt();
 }
 
 function renderAt(){
@@ -283,7 +301,7 @@ function renderAt(){
     const name = nameOf(id), cur = snap.hp[id], mx = maxOf(snap,id), pct = mx ? cur/mx*100 : 0;
     const mine = ev.filter(e=>nameOf(e.b)===name), atLv = mine.filter(e=>e.lv===curLv);
     return `<div class="boss ${cur===0?"dead":""}" style="--bc:${colorOf(name)}">
-      <div class="nm"><span>${D.bosses[id]?.step ? D.bosses[id].step + "번 · " : ""}${esc(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
+      <div class="nm"><span>${D.bosses[id]?.step ? D.bosses[id].step + "번 · " : ""}${bossLabel(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
       <div class="hpbar"><i style="width:${pct}%"></i></div>
       <div class="row"><span>남은 HP</span><span>${fmt(cur)} / ${fmt(mx)}</span></div>
       <div class="row"><span>이번 레벨</span><span>${atLv.length}회 · ${fmt(atLv.reduce((s,e)=>s+e.dmg,0))}</span></div>
@@ -300,7 +318,7 @@ function renderAt(){
   }).join("");
 
   renderTable(ev); renderFeed(ev, t);
-  hpChart?.update("none"); dmgChart?.update("none");
+  hpChart?.update("none");
 }
 
 // 그래프 위 세로선: 선택 시점(굵게)과 레벨업(점선)
@@ -325,7 +343,7 @@ const cursorPlugin = {
   }
 };
 function chartOpts(yfmt, ymax){
-  const grid = css("--line"), muted = css("--muted");
+  const grid = css("--grid"), muted = css("--muted");
   return {responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:"nearest", axis:"x", intersect:false},
     onClick:(e, _, c) => setT(Math.round(c.scales.x.getValueForPixel(e.x)/1000/STEP)*STEP),
     scales:{
@@ -333,8 +351,9 @@ function chartOpts(yfmt, ymax){
          afterBuildTicks: ax => { const out = []; for (let v = ax.min; v <= ax.max; v += 3*3600e3) out.push({value:v}); ax.ticks = out; },  // 05시부터 3시간 간격
          ticks:{color:muted, autoSkip:false, callback:v=>tstr(v/1000)}},
       y:{grid:{color:grid}, ticks:{color:muted, callback:yfmt}, beginAtZero:true, ...(ymax?{max:ymax}:{})}},
-    plugins:{legend:{labels:{color:css("--fg"), boxWidth:12}},
-      tooltip:{callbacks:{title:it=>tstr(it[0].parsed.x/1000,true)}}}};
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:css("--card"), titleColor:css("--fg"), bodyColor:css("--fg"), borderColor:css("--line"), borderWidth:1,
+               callbacks:{title:it=>tstr(it[0].parsed.x/1000,true)}}}};
 }
 const lineStyle = color => ({borderColor:color, backgroundColor:color, stepped:true, pointRadius:0, pointHitRadius:6, borderWidth:2, fill:false});
 
@@ -349,38 +368,17 @@ function buildHpChart(){
   opts.plugins.tooltip.callbacks.label = it => `${short(it.dataset.label)} Lv.${it.raw.lv}: ${it.parsed.y.toFixed(1)}% (${fmt(it.raw.cur)})`;
   hpChart?.destroy();
   hpChart = new Chart($("hpchart"), {type:"line", plugins:[cursorPlugin], options:opts,
-    data:{datasets:Object.entries(by).filter(([,p])=>p.length).map(([n,p])=>({label:n, data:p, ...lineStyle(colorOf(n))}))}});
+    data:{datasets:Object.entries(by).filter(([,p])=>p.length).map(([n,p])=>({label:n, data:p, hidden:hidden.has(n), ...lineStyle(colorOf(n))}))}});
+  // 범례: 약점 속성 아이콘만
+  $("legend").innerHTML = hpChart.data.datasets.map((ds,i)=>
+    `<button data-i="${i}" class="${hidden.has(ds.label)?"off":""}" aria-label="${esc(short(ds.label))} 선 켜기/끄기">${icon(ds.label)}</button>`).join("");
 }
-
-// 누적 대미지: 관측된 모든 공격을 더한다 (덮어쓰인 기록도 실제로 보스에 넣은 딜이므로 빼지 않는다)
-function cumSeries(keyFn){
-  const by = {};
-  for (const e of D.events) (by[keyFn(e)] ||= []).push(e);
-  const out = {};
-  for (const [k, arr] of Object.entries(by)){
-    arr.sort((a,b)=>a.t-b.t); let s = 0; const pts = [{x:t0()*1000, y:0}];
-    for (const e of arr){ s += e.dmg; if (pts.at(-1).x === e.t*1000) pts.at(-1).y = s; else pts.push({x:e.t*1000, y:s}); }
-    pts.push({x:tLast()*1000, y:s}); out[k] = pts;
-  }
-  return out;
-}
-function buildDmgChart(){
-  let sets;
-  if (mode === "boss"){
-    const s = cumSeries(e=>nameOf(e.b));
-    sets = NAMES.filter(n=>s[n]).map(n=>({label:n, data:s[n], ...lineStyle(colorOf(n))}));
-  } else if (mode === "member"){
-    const s = cumSeries(e=>e.m), ranked = Object.keys(s).sort((a,b)=>s[b].at(-1).y - s[a].at(-1).y);
-    sets = ranked.map((m,i)=>({label:m, data:s[m], hidden: selMember ? m!==selMember : i>=8, ...lineStyle(css(COLORS[i%COLORS.length]))}));
-  } else {
-    const s = cumSeries(()=>"전체");
-    sets = [{label:"전체", data:s["전체"]||[], ...lineStyle(css("--accent"))}];
-  }
-  const opts = chartOpts(v=>fmt(v));
-  opts.plugins.tooltip.callbacks.label = it => `${it.dataset.label}: ${fmt(it.parsed.y)}`;
-  dmgChart?.destroy();
-  dmgChart = new Chart($("chart"), {type:"line", data:{datasets:sets}, plugins:[cursorPlugin], options:opts});
-}
+$("legend").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if (!b) return;
+  const ds = hpChart.data.datasets[+b.dataset.i];
+  hidden.has(ds.label) ? hidden.delete(ds.label) : hidden.add(ds.label);
+  ds.hidden = hidden.has(ds.label); b.classList.toggle("off", ds.hidden); hpChart.update("none");
+});
 
 function renderTable(ev){
   const rows = {};
@@ -388,10 +386,12 @@ function renderTable(ev){
     const r = rows[e.m] ||= {m:e.m, n:0, total:0}, k = nameOf(e.b);
     r.n++; r.total += e.dmg; r[k] = (r[k]||0) + e.dmg;
   }
+  for (const r of Object.values(rows)) r.slv = lvOf(r.m, ev);
   const list = Object.values(rows).sort((a,b)=> sortKey==="m" ? sortDir*a.m.localeCompare(b.m) : sortDir*((a[sortKey]||0)-(b[sortKey]||0)));
-  const head = [["#",null],["멤버","m"],["횟수","n"],["총 대미지","total"], ...NAMES.map(n=>[short(n), n])];
-  $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${esc(k??"")}">${esc(h)}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
-    <tbody>${list.length ? list.map((r,i)=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""}"><td>${i+1}</td><td>${esc(r.m)}</td><td>${r.n}</td><td>${fmt(r.total)}</td>${NAMES.map(n=>`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
+  // [제목 HTML, 정렬 키]
+  const head = [["#",null],["멤버","m"],["레벨","slv"],["횟수","n"],["총 대미지","total"], ...NAMES.map(n=>[icon(n) || esc(short(n)), n])];
+  $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${esc(k??"")}">${h}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
+    <tbody>${list.length ? list.map((r,i)=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""}"><td>${i+1}</td><td>${esc(r.m)}</td><td>${r.slv ?? "-"}</td><td>${r.n}</td><td>${fmt(r.total)}</td>${NAMES.map(n=>`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
       : `<tr><td colspan="${head.length}" class="muted" style="text-align:left">아직 기록이 없어요.</td></tr>`}</tbody>`;
 }
 
@@ -404,21 +404,33 @@ function renderFeed(ev, t){
       ? `<div class="ev lvup">▲ Lv.${lv - 1} 클리어 → Lv.${lv} 시작</div>`
       : `<div class="ev ${e.gone && e.gone <= t ?"gone":""} ${e.t > t - STEP ? "new" : ""}" style="--bc:${colorOf(nameOf(e.b))}" title="${e.gone && e.gone<=t?"이후 같은 멤버의 더 높은 기록으로 갱신됨":""}">
       <span class="t">${e.pre?"이전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
-      <span class="b"><span class="dot"></span>Lv.${e.lv} ${esc(short(nameOf(e.b)))}${e.fh?` <b class="ok">🎯막타</b>`:""}</span>
+      <span class="b">Lv.${e.lv} ${bossLabel(nameOf(e.b))}${e.fh?` <b class="ok">🎯막타</b>`:""}</span>
       <span class="d">${fmt(e.dmg)}</span></div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
-  $("clr")?.addEventListener("click", x=>{x.preventDefault(); selMember=null; renderAt(); if(mode==="member") buildDmgChart();});
+  $("clr")?.addEventListener("click", x=>{x.preventDefault(); selMember=null; renderAt();});
 }
 
-$("mode").addEventListener("click", e=>{
-  const b = e.target.closest("button"); if (!b) return;
-  mode = b.dataset.v; [...$("mode").children].forEach(x=>x.classList.toggle("on", x===b)); buildDmgChart();
-});
 $("mt").addEventListener("click", e=>{
   const th = e.target.closest("th");
   if (th){ const k = th.dataset.k; if (!k) return; sortDir = k===sortKey ? -sortDir : (k==="m"?1:-1); sortKey = k; renderAt(); return; }
   const tr = e.target.closest("tr[data-m]"); if (!tr) return;
-  selMember = selMember===tr.dataset.m ? null : tr.dataset.m; renderAt(); if (mode==="member") buildDmgChart();
+  selMember = selMember===tr.dataset.m ? null : tr.dataset.m; renderAt();
 });
+
+// 테마: 자동(시스템) → 라이트 → 다크. 선택은 이 브라우저에만 저장된다.
+const THEMES = [["auto","자동"],["light","라이트"],["dark","다크"]];
+let theme = "auto";
+try { theme = localStorage.getItem("theme") || "auto"; } catch {}
+function applyTheme(){
+  if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme;
+  $("theme").textContent = (theme === "dark" ? "☾ " : theme === "light" ? "☀ " : "◐ ") + THEMES.find(x=>x[0]===theme)[1];
+  if (D) renderAll();   // 그래프 색은 그릴 때 읽으므로 다시 그린다
+}
+$("theme").onclick = () => {
+  theme = THEMES[(THEMES.findIndex(x=>x[0]===theme) + 1) % THEMES.length][0];
+  try { localStorage.setItem("theme", theme); } catch {}
+  applyTheme();
+};
+applyTheme();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>D && renderAll());
 
 async function tick(){
