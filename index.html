@@ -84,7 +84,8 @@ th .ei{width:20px;height:20px;vertical-align:middle;margin:0}
 .tbl{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
-th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+th:first-child,td:first-child{text-align:left}
+tr.none td{color:var(--muted)}
 th{cursor:pointer;user-select:none;font-size:12px;color:var(--muted);font-weight:600}
 tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 tbody tr{cursor:pointer}
@@ -397,16 +398,19 @@ $("legend").addEventListener("click", e=>{
 
 function renderTable(ev){
   const rows = {};
+  for (const m of D.members || []) rows[m] = {m, n:0, total:0};   // 미참여 멤버도 0회로
   for (const e of ev){
     const r = rows[e.m] ||= {m:e.m, n:0, total:0}, k = nameOf(e.b);
     r.n++; r.total += e.dmg; r[k] = (r[k]||0) + e.dmg;
   }
-  for (const r of Object.values(rows)) r.slv = lvOf(r.m, ev);
-  const list = Object.values(rows).sort((a,b)=> sortKey==="m" ? sortDir*a.m.localeCompare(b.m) : sortDir*((a[sortKey]||0)-(b[sortKey]||0)));
+  // 레벨: 명단의 현재 싱크로 레벨, 없으면 마지막 공격 당시 레벨
+  for (const r of Object.values(rows)) r.slv = D.levels?.[r.m] ?? lvOf(r.m, ev);
+  const list = Object.values(rows).sort((a,b)=> sortKey==="m" ? sortDir*a.m.localeCompare(b.m)
+    : sortDir*((a[sortKey]||0)-(b[sortKey]||0)) || a.m.localeCompare(b.m));
   // [제목 HTML, 정렬 키]
-  const head = [["#",null],["멤버","m"],["레벨","slv"],["횟수","n"],["총 대미지","total"], ...NAMES.map(n=>[icon(n) || esc(short(n)), n])];
+  const head = [["멤버","m"],["레벨","slv"],["횟수","n"],["총 대미지","total"], ...NAMES.map(n=>[icon(n) || esc(short(n)), n])];
   $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${esc(k??"")}">${h}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
-    <tbody>${list.length ? list.map((r,i)=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""}"><td>${i+1}</td><td>${esc(r.m)}</td><td>${r.slv ?? "-"}</td><td>${r.n}</td><td>${fmt(r.total)}</td>${NAMES.map(n=>`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
+    <tbody>${list.length ? list.map(r=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""} ${r.n?"":"none"}"><td>${esc(r.m)}</td><td>${r.slv ?? "-"}</td><td>${r.n}</td><td>${r.n?fmt(r.total):"-"}</td>${NAMES.map(n=>`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
       : `<tr><td colspan="${head.length}" class="muted" style="text-align:left">아직 기록이 없어요.</td></tr>`}</tbody>`;
 }
 
