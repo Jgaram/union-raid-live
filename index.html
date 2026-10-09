@@ -398,8 +398,11 @@ $("legend").addEventListener("click", e=>{
 
 function renderTable(ev){
   const rows = {};
-  for (const m of D.members || []) rows[m] = {m, n:0, total:0};   // 미참여 멤버도 0회로
+  // 현재 명단 기준 (정원 32). 미참여 멤버는 0회, 나간 멤버는 표에서 뺀다 (피드엔 남는다).
+  const roster = D.members?.length ? new Set(D.members) : null;
+  for (const m of D.members || []) rows[m] = {m, n:0, total:0};
   for (const e of ev){
+    if (roster && !roster.has(e.m)) continue;
     const r = rows[e.m] ||= {m:e.m, n:0, total:0}, k = nameOf(e.b);
     r.n++; r.total += e.dmg; r[k] = (r[k]||0) + e.dmg;
   }
