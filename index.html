@@ -81,7 +81,9 @@ tbody tr{cursor:pointer}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
 .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
 @media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}.chartwrap{height:240px}.tb-hide{display:none}}
-#err{display:none}
+#err,#demo{display:none}
+.demo{border:2px solid var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--card))}
+.demo b{color:var(--warn)}
 </style>
 </head>
 <body>
@@ -92,6 +94,10 @@ tbody tr{cursor:pointer}
     <span id="stat"></span>
   </div>
   <div id="err" class="card bad"></div>
+  <div id="demo" class="card demo">
+    <b>⚠ 가짜 데이터입니다.</b> 지난 시즌 하드 기록에 시각만 임의로 붙인 예시예요. 실제 상황이 아닙니다.<br>
+    <span class="muted">하드가 열리면 이 페이지가 자동으로 실제 데이터로 바뀝니다.</span>
+  </div>
 
   <div class="timebar">
     <div class="tb-row">
@@ -147,8 +153,10 @@ const SOURCES = [
   () => fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/data.json?t=${Date.now()}`, {cache:"no-store"}),
 ];
 if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) SOURCES.unshift(() => fetch(`data.json?t=${Date.now()}`));  // 로컬 미리보기
-const DEMO = new URLSearchParams(location.search).has("demo");   // ?demo = 가짜 데이터 (live/fake.py)
-if (DEMO) SOURCES.splice(0, SOURCES.length, () => fetch("demo.json"));
+// 가짜 데이터(live/fake.py): ?demo 이거나, 아직 하드가 안 열려 실제 데이터가 비어 있을 때
+const FORCE_DEMO = new URLSearchParams(location.search).has("demo");
+let DEMO = FORCE_DEMO;
+if (FORCE_DEMO) SOURCES.splice(0, SOURCES.length, () => fetch("demo.json"));
 const REFRESH_MS = 120000, STEP = 300;
 const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6"];
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -232,7 +240,8 @@ function renderAll(){
   $("title").textContent = document.title = `유니온 레이드 ${diffName}`;
   const ago = Math.round((Date.now()/1000 - D.checked)/60);
   $("upd").textContent = `마지막 수집 ${tstr(D.checked, true)} (${ago}분 전)`;
-  const st = D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
+  if (DEMO) $("upd").textContent = "예시 화면";
+  const st = DEMO ? ["warn","가짜 데이터"] : D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
   $("stat").innerHTML = `<span class="badge ${st[0]}" title="${esc(D.status)}">${st[1]}</span>`;
   NAMES = [...new Set(Object.values(D.bosses).sort((a,b)=>(a.step??9)-(b.step??9)).map(b => b.name))];
   setupSlider(); buildHpChart(); buildDmgChart(); renderAt();
@@ -403,7 +412,13 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>D && r
 
 async function tick(){
   if (playTimer) return;   // 재생 중엔 새로 불러오지 않는다
-  try { D = await load(); $("err").style.display="none"; renderAll(); }
+  try {
+    D = await load();
+    DEMO = FORCE_DEMO || (!D.hp.length && !D.events.length);
+    if (DEMO && !FORCE_DEMO) D = await (await fetch("demo.json")).json();
+    $("demo").style.display = DEMO ? "block" : "none";
+    $("err").style.display="none"; renderAll();
+  }
   catch(e){ $("err").style.display="block"; $("err").textContent = `데이터를 불러오지 못했어요: ${e.message}`; }
 }
 tick(); setInterval(tick, REFRESH_MS);
