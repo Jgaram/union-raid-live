@@ -90,6 +90,7 @@ tbody tr{cursor:pointer}
 <main>
   <div class="top">
     <h1 id="title">유니온 레이드 하드</h1>
+    <span id="win" style="font-weight:600"></span>
     <span id="upd" class="muted">불러오는 중…</span>
     <span id="stat"></span>
   </div>
@@ -187,8 +188,11 @@ const nameOf = id => D.bosses[id]?.name ?? id;
 let NAMES = [];
 const colorOf = name => css(COLORS[Math.max(0, NAMES.indexOf(name)) % COLORS.length]);
 const short = n => n.replace(/\s*\[.*\]/, "");
-const t0 = () => Math.min(D.hp[0]?.t ?? D.checked, D.events[0]?.t ?? D.checked);
-const now = () => T ?? D.checked;
+// 하드 창 (05:00 ~ 다음날 05:00 KST). 그래프와 슬라이더는 이 24시간에 고정한다.
+const t0 = () => D.window?.start ?? Math.min(D.hp[0]?.t ?? D.checked, D.events[0]?.t ?? D.checked);
+const tEnd = () => D.window?.end ?? D.checked;
+const tLast = () => Math.min(D.checked, tEnd());   // 데이터가 있는 마지막 시각
+const now = () => T ?? tLast();
 const evAt = t => D.events.filter(e => e.t <= t);
 const snapAt = t => { let s = null; for (const h of D.hp){ if (h.t <= t) s = h; else break; } return s; };
 const maxOf = (s, id) => s.max?.[id] ?? D.bosses[id]?.max_hp;
@@ -209,13 +213,14 @@ async function load(){
 
 // ── 시간 막대 ──
 function setupSlider(){
-  const s = $("slider"), a = Math.floor(t0()/STEP)*STEP, b = D.checked;
+  const s = $("slider"), a = t0(), b = Math.max(a, tLast());
   s.min = a; s.max = b; s.value = now();
-  $("tstart").textContent = tstr(a, true); $("tend").textContent = tstr(b, true) + " (최신)";
+  $("tstart").textContent = tstr(a, true) + " 오픈";
+  $("tend").textContent = D.checked >= tEnd() ? tstr(tEnd(), true) + " 종료" : tstr(b, true) + " (최신)";
 }
 function setT(t, fromPlay){
   if (!fromPlay) stopPlay();
-  T = t == null || t >= D.checked ? null : Math.max(+$("slider").min, t);
+  T = t == null || t >= tLast() ? null : Math.max(+$("slider").min, t);
   $("slider").value = now();
   $("livebtn").classList.toggle("on", T == null);
   renderAt();
@@ -227,7 +232,7 @@ $("play").onclick = () => {
   $("play").textContent = "⏸";
   playTimer = setInterval(() => {
     const nt = now() + STEP * +$("speed").value;
-    if (nt >= D.checked){ stopPlay(); setT(null); return; }
+    if (nt >= tLast()){ stopPlay(); setT(null); return; }
     setT(nt, true);
   }, 120);
 };
@@ -241,6 +246,9 @@ function renderAll(){
   const ago = Math.round((Date.now()/1000 - D.checked)/60);
   $("upd").textContent = `마지막 수집 ${tstr(D.checked, true)} (${ago}분 전)`;
   if (DEMO) $("upd").textContent = "예시 화면";
+  const nowS = Date.now()/1000, ws = t0(), we = tEnd();
+  $("win").textContent = `하드 ${tstr(ws,true)} ~ ${tstr(we,true)}` + (DEMO ? "" :
+    nowS < ws ? ` · 시작까지 ${dur(ws-nowS)}` : nowS < we ? ` · 남은 시간 ${dur(we-nowS)}` : " · 종료");
   const st = DEMO ? ["warn","가짜 데이터"] : D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
   $("stat").innerHTML = `<span class="badge ${st[0]}" title="${esc(D.status)}">${st[1]}</span>`;
   NAMES = [...new Set(Object.values(D.bosses).sort((a,b)=>(a.step??9)-(b.step??9)).map(b => b.name))];
@@ -254,7 +262,8 @@ function renderAt(){
   const ups = levelUps().filter(u => u.t <= t);
   const curLv = snap?.lv;
   const lvStart = ups.at(-1)?.t;
-  $("tinfo").textContent = curLv ? `Lv.${curLv} 진행 중 · ${dur(t - lvStart)}째` : "";
+  $("tinfo").textContent = (curLv ? `Lv.${curLv} 진행 중 · ${dur(t - lvStart)}째` : "")
+    + (t < tEnd() && t >= t0() ? ` · 마감까지 ${dur(tEnd() - t)}` : "");
 
   // KPI
   const total = ev.reduce((s,e)=>s+e.dmg,0), active = new Set(ev.map(e=>e.m));
@@ -320,7 +329,9 @@ function chartOpts(yfmt, ymax){
   return {responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:"nearest", axis:"x", intersect:false},
     onClick:(e, _, c) => setT(Math.round(c.scales.x.getValueForPixel(e.x)/1000/STEP)*STEP),
     scales:{
-      x:{type:"linear", min:t0()*1000, max:D.checked*1000, grid:{color:grid}, ticks:{color:muted, maxTicksLimit:8, callback:v=>tstr(v/1000)}},
+      x:{type:"linear", min:t0()*1000, max:tEnd()*1000, grid:{color:grid},
+         afterBuildTicks: ax => { const out = []; for (let v = ax.min; v <= ax.max; v += 3*3600e3) out.push({value:v}); ax.ticks = out; },  // 05시부터 3시간 간격
+         ticks:{color:muted, autoSkip:false, callback:v=>tstr(v/1000)}},
       y:{grid:{color:grid}, ticks:{color:muted, callback:yfmt}, beginAtZero:true, ...(ymax?{max:ymax}:{})}},
     plugins:{legend:{labels:{color:css("--fg"), boxWidth:12}},
       tooltip:{callbacks:{title:it=>tstr(it[0].parsed.x/1000,true)}}}};
@@ -333,7 +344,7 @@ function buildHpChart(){
   for (const h of D.hp) for (const [id, cur] of Object.entries(h.hp)){
     const mx = maxOf(h,id); (by[nameOf(id)] ||= []).push({x:h.t*1000, y: mx ? cur/mx*100 : 0, lv:h.lv, cur, mx});
   }
-  for (const pts of Object.values(by)) if (pts.length) pts.push({...pts.at(-1), x:D.checked*1000});
+  for (const pts of Object.values(by)) if (pts.length) pts.push({...pts.at(-1), x:tLast()*1000});
   const opts = chartOpts(v=>v+"%", 100);
   opts.plugins.tooltip.callbacks.label = it => `${short(it.dataset.label)} Lv.${it.raw.lv}: ${it.parsed.y.toFixed(1)}% (${fmt(it.raw.cur)})`;
   hpChart?.destroy();
@@ -349,7 +360,7 @@ function cumSeries(keyFn){
   for (const [k, arr] of Object.entries(by)){
     arr.sort((a,b)=>a.t-b.t); let s = 0; const pts = [{x:t0()*1000, y:0}];
     for (const e of arr){ s += e.dmg; if (pts.at(-1).x === e.t*1000) pts.at(-1).y = s; else pts.push({x:e.t*1000, y:s}); }
-    pts.push({x:D.checked*1000, y:s}); out[k] = pts;
+    pts.push({x:tLast()*1000, y:s}); out[k] = pts;
   }
   return out;
 }
