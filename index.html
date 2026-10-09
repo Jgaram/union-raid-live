@@ -58,7 +58,6 @@ tbody tr{cursor:pointer}
 .ev .d{flex:none;font-weight:600}
 .ev.gone{opacity:.5}.ev.gone .d{text-decoration:line-through}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
-.chips span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:1px 8px;margin:2px;font-size:12px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}.chartwrap{height:260px}}
 #err{display:none}
@@ -99,11 +98,6 @@ tbody tr{cursor:pointer}
       <div class="feed" id="feed"></div>
     </section>
   </div>
-
-  <section class="card">
-    <h2>하드 미참여 <span class="muted" style="font-weight:400;font-size:12px">(이번 시즌 기록이 있는 멤버 기준)</span></h2>
-    <div class="chips" id="idle"></div>
-  </section>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -165,7 +159,7 @@ function render(){
   const lastHp = D.hp[D.hp.length-1];
   $("kpis").innerHTML = [
     [fmt(total), "총 대미지"], [ev.length, "기록 수"],
-    [`${active.size} / ${D.members.length}`, "참여 멤버"],
+    [active.size, "참여 멤버"],
     [lastHp ? `Lv.${lastHp.lv}` : "-", "현재 레벨"],
   ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("");
 
@@ -179,8 +173,6 @@ function render(){
   }).join("");
 
   renderChart(); renderTable(); renderFeed();
-  const idle = D.members.filter(m=>!active.has(m));
-  $("idle").innerHTML = idle.length ? idle.map(m=>`<span>${esc(m)}</span>`).join("") : `<span class="muted">모두 참여</span>`;
 }
 
 // 누적 계열: 기록이 생기면 +, 응답에서 사라지면(덮어쓰기) − 로 계단형 시계열을 만든다.
