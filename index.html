@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>유니온 레이드 현황</title>
+<title>요정 · 유니온 레이드</title>
 <meta name="robots" content="noindex">
+<link rel="icon" href="favicon.png">
 <style>
 :root{
   color-scheme:light;
@@ -30,6 +31,10 @@ h1{font-size:20px;margin:0}
 h2{font-size:15px;margin:0 0 10px}
 h2 small{font-weight:400;font-size:12px;color:var(--muted)}
 .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;padding:16px 0 10px}
+.brand{display:flex;align-items:center;gap:10px;align-self:center}
+.brand img{width:48px;height:48px;border-radius:50%;background:#d6eaff;border:2px solid var(--e-water);object-fit:cover}
+.brand .union{display:block;font-size:12px;color:var(--muted);line-height:1.2}
+.brand .union b{color:var(--e-water);font-size:13px}
 .muted{color:var(--muted)}
 .badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid currentColor}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
@@ -68,7 +73,8 @@ th .ei{width:20px;height:20px;vertical-align:middle;margin:0}
 .legend button{background:none;border:1px solid var(--line);border-radius:8px;padding:4px;cursor:pointer;line-height:0}
 .legend button.off{opacity:.3}
 .legend .ei{width:24px;height:24px}
-.theme{margin-left:auto}
+.top{position:relative;padding-right:48px}
+.theme{position:absolute;right:0;top:16px}
 .chartwrap{position:relative;height:300px}
 .chartwrap canvas{cursor:crosshair}
 .note{font-size:12px;color:var(--muted);margin:8px 0 0}
@@ -107,7 +113,10 @@ tbody tr{cursor:pointer}
 <body>
 <main>
   <div class="top">
-    <h1 id="title">유니온 레이드 하드</h1>
+    <div class="brand">
+      <img src="logo.webp" alt="" width="48" height="48">
+      <div><span class="union">유니온 <b>요정</b></span><h1 id="title">유니온 레이드 하드</h1></div>
+    </div>
     <span id="win" style="font-weight:600"></span>
     <span id="upd" class="muted">불러오는 중…</span>
     <span id="stat"></span>
@@ -265,7 +274,8 @@ $("livebtn").onclick = () => setT(null);
 // ── 그리기 ──
 function renderAll(){
   const diffName = (D.difficulty === 2 ? "하드" : "노멀(테스트)") + (DEMO ? " · 가짜 데이터" : "");
-  $("title").textContent = document.title = `유니온 레이드 ${diffName}`;
+  $("title").textContent = `유니온 레이드 ${diffName}`;
+  document.title = `요정 · 유니온 레이드 ${diffName}`;
   const ago = Math.round((Date.now()/1000 - D.checked)/60);
   $("upd").textContent = `마지막 수집 ${tstr(D.checked, true)} (${ago}분 전)`;
   if (DEMO) $("upd").textContent = "예시 화면";
