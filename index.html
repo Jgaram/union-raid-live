@@ -8,41 +8,60 @@
 <style>
 :root{
   --bg:#f6f7f9;--card:#fff;--fg:#1b1f24;--muted:#6b7480;--line:#e3e6ea;--accent:#3b6fe0;
-  --ok:#1f9d55;--warn:#c47f00;--bad:#d64545;--bar:#e9ecf0;
+  --ok:#1f9d55;--warn:#c47f00;--bad:#d64545;--bar:#e9ecf0;--cursor:#1b1f24;
   --c1:#3b6fe0;--c2:#e0703b;--c3:#2aa876;--c4:#a24ad6;--c5:#d6a12a;--c6:#d64577;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#111418;--card:#1a1e24;--fg:#e6e9ee;--muted:#9aa3ad;--line:#2b313a;--accent:#6e95f0;
-  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;
+  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;--cursor:#e6e9ee;
   --c1:#6e95f0;--c2:#f08e5e;--c3:#4cc995;--c4:#bf7cf0;--c5:#e8c051;--c6:#f0709a;}}
 :root[data-theme="dark"]{
   --bg:#111418;--card:#1a1e24;--fg:#e6e9ee;--muted:#9aa3ad;--line:#2b313a;--accent:#6e95f0;
-  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;
+  --ok:#3cc47a;--warn:#e0a83a;--bad:#ef6b6b;--bar:#2b313a;--cursor:#e6e9ee;
   --c1:#6e95f0;--c2:#f08e5e;--c3:#4cc995;--c4:#bf7cf0;--c5:#e8c051;--c6:#f0709a;}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif}
-main{max-width:1100px;margin:0 auto;padding:16px}
+main{max-width:1100px;margin:0 auto;padding:0 16px 16px}
 h1{font-size:20px;margin:0}
 h2{font-size:15px;margin:0 0 10px}
-.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-bottom:14px}
+h2 small{font-weight:400;font-size:12px;color:var(--muted)}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;padding:16px 0 10px}
 .muted{color:var(--muted)}
 .badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid currentColor}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+
+/* 시간 막대 */
+.timebar{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 10px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.tb-row{display:flex;align-items:center;gap:10px}
+.tb-row input[type=range]{flex:1;min-width:0;accent-color:var(--accent)}
+.tb-btn{background:var(--card);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit;white-space:nowrap}
+.tb-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tb-when{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tb-when.past{color:var(--warn)}
+.tb-sub{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px;gap:8px}
+select.tb-btn{padding:4px 6px}
+
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
 .kpi span{font-size:12px;color:var(--muted)}
-.bosses{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.boss{border:1px solid var(--line);border-radius:8px;padding:10px;border-top:4px solid var(--bc)}
-.boss .nm{font-weight:600;font-size:13px}
+.bosses{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.boss{border:1px solid var(--line);border-left:4px solid var(--bc);border-radius:8px;padding:8px 10px}
+.boss .nm{font-weight:600;font-size:13px;display:flex;justify-content:space-between;gap:6px}
+.boss.dead{opacity:.55}
 .hpbar{height:8px;background:var(--bar);border-radius:4px;overflow:hidden;margin:6px 0}
-.hpbar i{display:block;height:100%;background:var(--bc)}
+.hpbar i{display:block;height:100%;background:var(--bc);transition:width .15s}
 .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
 .seg button{background:none;border:0;color:var(--fg);padding:5px 12px;cursor:pointer;font:inherit}
 .seg button.on{background:var(--accent);color:#fff}
-.chartwrap{position:relative;height:320px}
+.chartwrap{position:relative;height:300px}
+.chartwrap canvas{cursor:crosshair}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.levels{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:12px}
+.levels span{border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.levels span.cur{border-color:var(--accent);color:var(--accent)}
 .tbl{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
@@ -50,16 +69,18 @@ th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 th{cursor:pointer;user-select:none;font-size:12px;color:var(--muted);font-weight:600}
 tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 tbody tr{cursor:pointer}
-.feed{max-height:420px;overflow-y:auto}
+.feed{max-height:440px;overflow-y:auto}
 .ev{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;align-items:center}
-.ev .t{color:var(--muted);width:72px;flex:none;font-size:12px}
-.ev .m{width:64px;flex:none;font-weight:600}
+.ev .t{color:var(--muted);width:46px;flex:none;font-size:12px}
+.ev .m{width:58px;flex:none;font-weight:600}
 .ev .b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ev .d{flex:none;font-weight:600}
-.ev.gone{opacity:.5}.ev.gone .d{text-decoration:line-through}
+.ev.gone .d{text-decoration:line-through;opacity:.6}
+.ev.new{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.ev.lvup{justify-content:center;color:var(--accent);font-weight:600;font-size:12px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:760px){.grid2{grid-template-columns:1fr}.chartwrap{height:260px}}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}.chartwrap{height:240px}.tb-hide{display:none}}
 #err{display:none}
 </style>
 </head>
@@ -72,29 +93,46 @@ tbody tr{cursor:pointer}
   </div>
   <div id="err" class="card bad"></div>
 
+  <div class="timebar">
+    <div class="tb-row">
+      <button class="tb-btn" id="play" title="처음부터 빠르게 재생">▶</button>
+      <input type="range" id="slider" min="0" max="0" step="300" value="0" aria-label="시점 선택">
+      <span class="tb-when" id="when">-</span>
+      <select class="tb-btn tb-hide" id="speed" title="재생 속도"><option value="1">×1</option><option value="3" selected>×3</option><option value="10">×10</option></select>
+      <button class="tb-btn on" id="livebtn">실시간</button>
+    </div>
+    <div class="tb-sub"><span id="tstart"></span><span id="tinfo"></span><span id="tend"></span></div>
+  </div>
+
   <div class="kpis" id="kpis"></div>
 
   <section class="card">
-    <h2>보스 현황</h2>
+    <h2>보스 현황 <small id="bossh"></small></h2>
     <div class="bosses" id="bosses"></div>
   </section>
 
   <section class="card">
-    <h2>시간별 누적 대미지</h2>
+    <h2>보스 체력 변화 <small>— 그래프를 누르면 그 시점으로 이동</small></h2>
+    <div class="chartwrap"><canvas id="hpchart"></canvas></div>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <section class="card">
+    <h2>누적 대미지 <small>— 그래프를 누르면 그 시점으로 이동</small></h2>
     <div class="seg" id="mode">
       <button data-v="boss" class="on">보스별</button><button data-v="member">멤버별</button><button data-v="total">전체</button>
     </div>
     <div class="chartwrap"><canvas id="chart"></canvas></div>
-    <p class="muted" style="font-size:12px;margin:8px 0 0">시각은 5분 간격 수집 시각 기준이라 실제 공격 시각과 최대 5분 차이 납니다. 휠·핀치로 확대는 되지 않고, 범례를 눌러 선을 켜고 끌 수 있습니다.</p>
+    <p class="note">시각은 5분 간격 수집 시각 기준이라 실제 공격과 최대 5분 차이 납니다. 범례를 눌러 선을 켜고 끌 수 있어요.</p>
   </section>
 
   <div class="grid2">
     <section class="card">
-      <h2>멤버별 <span class="muted" style="font-weight:400;font-size:12px">— 줄을 누르면 피드가 그 멤버만 보여요</span></h2>
+      <h2>멤버별 <small>— 줄을 누르면 피드가 그 멤버만</small></h2>
       <div class="tbl"><table id="mt"></table></div>
     </section>
     <section class="card">
-      <h2>실시간 피드 <span id="feedf" class="muted" style="font-weight:400;font-size:12px"></span></h2>
+      <h2>피드 <small id="feedf"></small></h2>
       <div class="feed" id="feed"></div>
     </section>
   </div>
@@ -109,17 +147,20 @@ const SOURCES = [
   () => fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/data.json?t=${Date.now()}`, {cache:"no-store"}),
 ];
 if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) SOURCES.unshift(() => fetch(`data.json?t=${Date.now()}`));  // 로컬 미리보기
-const REFRESH_MS = 120000;
+const DEMO = new URLSearchParams(location.search).has("demo");   // ?demo = 가짜 데이터 (live/fake.py)
+if (DEMO) SOURCES.splice(0, SOURCES.length, () => fetch("demo.json"));
+const REFRESH_MS = 120000, STEP = 300;
 const COLORS = ["--c1","--c2","--c3","--c4","--c5","--c6"];
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const $ = id => document.getElementById(id);
 
-let D = null, mode = "boss", selMember = null, sortKey = "total", sortDir = -1, chart = null;
+let D = null, T = null /* null = 실시간 */, mode = "boss", selMember = null, sortKey = "total", sortDir = -1;
+let hpChart = null, dmgChart = null, playTimer = null;
 
+// ── 형식 ──
 function fmt(n){
   if (n == null) return "-";
-  const a = Math.abs(n);
-  const trim = s => s.includes(".") ? s.replace(/\.?0+$/,"") : s;
+  const a = Math.abs(n), trim = s => s.includes(".") ? s.replace(/\.?0+$/,"") : s;
   if (a >= 1e12) return trim((n/1e12).toFixed(2)) + "조";
   if (a >= 1e8) return trim((n/1e8).toFixed(a >= 1e10 ? 0 : 2)) + "억";
   if (a >= 1e4) return Math.round(n/1e4).toLocaleString() + "만";
@@ -130,7 +171,24 @@ function tstr(t, withDate){
   const d = new Date(t*1000);
   return (withDate ? `${d.getMonth()+1}/${d.getDate()} ` : "") + `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+function dur(s){ const h = Math.floor(s/3600), m = Math.round(s%3600/60); return h ? `${h}시간 ${m}분` : `${m}분`; }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+// ── 데이터 도우미 (보스는 레벨마다 id가 바뀔 수 있어서 이름으로 묶는다) ──
+const nameOf = id => D.bosses[id]?.name ?? id;
+let NAMES = [];
+const colorOf = name => css(COLORS[Math.max(0, NAMES.indexOf(name)) % COLORS.length]);
+const short = n => n.replace(/\s*\[.*\]/, "");
+const t0 = () => Math.min(D.hp[0]?.t ?? D.checked, D.events[0]?.t ?? D.checked);
+const now = () => T ?? D.checked;
+const evAt = t => D.events.filter(e => e.t <= t);
+const snapAt = t => { let s = null; for (const h of D.hp){ if (h.t <= t) s = h; else break; } return s; };
+const maxOf = (s, id) => s.max?.[id] ?? D.bosses[id]?.max_hp;
+function levelUps(){        // [{lv, t}] 각 레벨이 시작된 시각
+  const out = []; let prev = null;
+  for (const h of D.hp){ if (h.lv !== prev){ out.push({lv:h.lv, t:h.t}); prev = h.lv; } }
+  return out;
+}
 
 async function load(){
   let lastErr;
@@ -141,120 +199,211 @@ async function load(){
   throw new Error(lastErr);
 }
 
-function bossOrder(){ return Object.keys(D.bosses); }
-function bossColor(id){ return css(COLORS[bossOrder().indexOf(id) % COLORS.length]); }
-const live = () => D.events.filter(e => !e.gone);   // 현재 응답에 남아 있는 기록 = 실제 반영된 딜
+// ── 시간 막대 ──
+function setupSlider(){
+  const s = $("slider"), a = Math.floor(t0()/STEP)*STEP, b = D.checked;
+  s.min = a; s.max = b; s.value = now();
+  $("tstart").textContent = tstr(a, true); $("tend").textContent = tstr(b, true) + " (최신)";
+}
+function setT(t, fromPlay){
+  if (!fromPlay) stopPlay();
+  T = t == null || t >= D.checked ? null : Math.max(+$("slider").min, t);
+  $("slider").value = now();
+  $("livebtn").classList.toggle("on", T == null);
+  renderAt();
+}
+function stopPlay(){ clearInterval(playTimer); playTimer = null; $("play").textContent = "▶"; }
+$("play").onclick = () => {
+  if (playTimer){ stopPlay(); return; }
+  if (T == null) setT(+$("slider").min);
+  $("play").textContent = "⏸";
+  playTimer = setInterval(() => {
+    const nt = now() + STEP * +$("speed").value;
+    if (nt >= D.checked){ stopPlay(); setT(null); return; }
+    setT(nt, true);
+  }, 120);
+};
+$("slider").oninput = e => setT(+e.target.value);
+$("livebtn").onclick = () => setT(null);
 
-function render(){
-  const diffName = D.difficulty === 2 ? "하드" : "노멀(테스트)";
-  $("title").textContent = `유니온 레이드 ${diffName}`;
-  document.title = `유니온 레이드 ${diffName}`;
+// ── 그리기 ──
+function renderAll(){
+  const diffName = (D.difficulty === 2 ? "하드" : "노멀(테스트)") + (DEMO ? " · 가짜 데이터" : "");
+  $("title").textContent = document.title = `유니온 레이드 ${diffName}`;
   const ago = Math.round((Date.now()/1000 - D.checked)/60);
   $("upd").textContent = `마지막 수집 ${tstr(D.checked, true)} (${ago}분 전)`;
   const st = D.status !== "ok" ? ["bad","수집 오류"] : ago > 15 ? ["warn","수집 지연"] : ["ok","정상"];
   $("stat").innerHTML = `<span class="badge ${st[0]}" title="${esc(D.status)}">${st[1]}</span>`;
-
-  const ev = live(), total = ev.reduce((s,e)=>s+e.dmg,0);
-  const active = new Set(ev.map(e=>e.m));
-  const lastHp = D.hp[D.hp.length-1];
-  $("kpis").innerHTML = [
-    [fmt(total), "총 대미지"], [ev.length, "기록 수"],
-    [active.size, "참여 멤버"],
-    [lastHp ? `Lv.${lastHp.lv}` : "-", "현재 레벨"],
-  ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("");
-
-  $("bosses").innerHTML = bossOrder().map(id=>{
-    const b = D.bosses[id], cur = lastHp?.hp[id], dealt = ev.filter(e=>e.b===id).reduce((s,e)=>s+e.dmg,0);
-    const pct = b.max_hp && cur != null ? cur/b.max_hp*100 : null;
-    return `<div class="boss" style="--bc:${bossColor(id)}"><div class="nm">${esc(b.name)}</div>
-      <div class="hpbar"><i style="width:${pct??0}%"></i></div>
-      <div class="row"><span>HP ${pct==null?"-":pct.toFixed(1)+"%"}</span><span>${fmt(cur)} / ${fmt(b.max_hp)}</span></div>
-      <div class="row"><span>누적 딜</span><span>${fmt(dealt)} · ${ev.filter(e=>e.b===id).length}회</span></div></div>`;
-  }).join("");
-
-  renderChart(); renderTable(); renderFeed();
+  NAMES = [...new Set(Object.values(D.bosses).map(b => b.name))];
+  setupSlider(); buildHpChart(); buildDmgChart(); renderAt();
 }
 
-// 누적 계열: 기록이 생기면 +, 응답에서 사라지면(덮어쓰기) − 로 계단형 시계열을 만든다.
-function series(keyFn){
-  const steps = {};
-  for (const e of D.events){
-    const k = keyFn(e); (steps[k] ||= []).push([e.t, e.dmg]);
-    if (e.gone) steps[k].push([e.gone, -e.dmg]);
+function renderAt(){
+  const t = now(), ev = evAt(t), snap = snapAt(t), past = T != null;
+  $("when").textContent = past ? tstr(t, true) + " 시점" : "실시간";
+  $("when").classList.toggle("past", past);
+  const ups = levelUps().filter(u => u.t <= t);
+  const curLv = snap?.lv;
+  const lvStart = ups.at(-1)?.t;
+  $("tinfo").textContent = curLv ? `Lv.${curLv} 진행 중 · ${dur(t - lvStart)}째` : "";
+
+  // KPI
+  const total = ev.reduce((s,e)=>s+e.dmg,0), active = new Set(ev.map(e=>e.m));
+  let lvPct = null;
+  if (snap){ const ids = Object.keys(snap.hp), mx = ids.reduce((s,i)=>s+maxOf(snap,i),0), cur = ids.reduce((s,i)=>s+snap.hp[i],0); lvPct = mx ? (1-cur/mx)*100 : null; }
+  $("kpis").innerHTML = [
+    [curLv ? `Lv.${curLv}` : "-", "현재 레벨"],
+    [lvPct == null ? "-" : lvPct.toFixed(1)+"%", "이번 레벨 진행"],
+    [fmt(total), "총 대미지 (기록 기준)"],
+    [`${ev.length}회 · ${active.size}명`, "공격 · 참여 멤버"],
+  ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("");
+
+  // 보스 카드
+  $("bossh").textContent = curLv ? `— Lv.${curLv}` : "";
+  const ids = snap ? Object.keys(snap.hp) : [];
+  $("bosses").innerHTML = ids.length ? ids.map(id=>{
+    const name = nameOf(id), cur = snap.hp[id], mx = maxOf(snap,id), pct = mx ? cur/mx*100 : 0;
+    const mine = ev.filter(e=>nameOf(e.b)===name), atLv = mine.filter(e=>e.lv===curLv);
+    return `<div class="boss ${cur===0?"dead":""}" style="--bc:${colorOf(name)}">
+      <div class="nm"><span>${esc(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
+      <div class="hpbar"><i style="width:${pct}%"></i></div>
+      <div class="row"><span>남은 HP</span><span>${fmt(cur)} / ${fmt(mx)}</span></div>
+      <div class="row"><span>이번 레벨</span><span>${atLv.length}회 · ${fmt(atLv.reduce((s,e)=>s+e.dmg,0))}</span></div>
+      <div class="row"><span>전체</span><span>${mine.length}회 · ${fmt(mine.reduce((s,e)=>s+e.dmg,0))}</span></div></div>`;
+  }).join("") : `<p class="muted">아직 보스 정보가 없어요.</p>`;
+
+  // 레벨 기록
+  const allUps = levelUps();
+  $("levels").innerHTML = allUps.map((u,i)=>{
+    const end = allUps[i+1]?.t, reached = u.t <= t;
+    if (!reached) return "";
+    const txt = end && end <= t ? `Lv.${u.lv} ${tstr(u.t)}~${tstr(end)} (${dur(end-u.t)})` : `Lv.${u.lv} ${tstr(u.t)}~ 진행 중`;
+    return `<span class="${u.lv===curLv?"cur":""}">${txt}</span>`;
+  }).join("");
+
+  renderTable(ev); renderFeed(ev, t);
+  hpChart?.update("none"); dmgChart?.update("none");
+}
+
+// 그래프 위 세로선: 선택 시점(굵게)과 레벨업(점선)
+const cursorPlugin = {
+  id:"cursor",
+  afterDatasetsDraw(c){
+    const {ctx, chartArea:a, scales:{x}} = c;
+    ctx.save();
+    ctx.font = "11px system-ui"; ctx.fillStyle = css("--muted");
+    for (const u of levelUps().slice(1)){
+      const px = x.getPixelForValue(u.t*1000); if (px < a.left || px > a.right) continue;
+      ctx.strokeStyle = css("--muted"); ctx.setLineDash([4,4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      ctx.fillText(`Lv.${u.lv}`, px + 3, a.top + 11);
+    }
+    if (T != null){
+      const px = x.getPixelForValue(T*1000);
+      ctx.setLineDash([]); ctx.strokeStyle = css("--cursor"); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+    }
+    ctx.restore();
   }
+};
+function chartOpts(yfmt, ymax){
+  const grid = css("--line"), muted = css("--muted");
+  return {responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:"nearest", axis:"x", intersect:false},
+    onClick:(e, _, c) => setT(Math.round(c.scales.x.getValueForPixel(e.x)/1000/STEP)*STEP),
+    scales:{
+      x:{type:"linear", min:t0()*1000, max:D.checked*1000, grid:{color:grid}, ticks:{color:muted, maxTicksLimit:8, callback:v=>tstr(v/1000)}},
+      y:{grid:{color:grid}, ticks:{color:muted, callback:yfmt}, beginAtZero:true, ...(ymax?{max:ymax}:{})}},
+    plugins:{legend:{labels:{color:css("--fg"), boxWidth:12}},
+      tooltip:{callbacks:{title:it=>tstr(it[0].parsed.x/1000,true)}}}};
+}
+const lineStyle = color => ({borderColor:color, backgroundColor:color, stepped:true, pointRadius:0, pointHitRadius:6, borderWidth:2, fill:false});
+
+function buildHpChart(){
+  // 보스 이름별 남은 HP% — 레벨이 오르면 100%로 다시 올라간다
+  const by = Object.fromEntries(NAMES.map(n=>[n,[]]));
+  for (const h of D.hp) for (const [id, cur] of Object.entries(h.hp)){
+    const mx = maxOf(h,id); (by[nameOf(id)] ||= []).push({x:h.t*1000, y: mx ? cur/mx*100 : 0, lv:h.lv, cur, mx});
+  }
+  for (const pts of Object.values(by)) if (pts.length) pts.push({...pts.at(-1), x:D.checked*1000});
+  const opts = chartOpts(v=>v+"%", 100);
+  opts.plugins.tooltip.callbacks.label = it => `${short(it.dataset.label)} Lv.${it.raw.lv}: ${it.parsed.y.toFixed(1)}% (${fmt(it.raw.cur)})`;
+  hpChart?.destroy();
+  hpChart = new Chart($("hpchart"), {type:"line", plugins:[cursorPlugin], options:opts,
+    data:{datasets:Object.entries(by).filter(([,p])=>p.length).map(([n,p])=>({label:n, data:p, ...lineStyle(colorOf(n))}))}});
+}
+
+// 누적 대미지: 관측된 모든 공격을 더한다 (덮어쓰인 기록도 실제로 보스에 넣은 딜이므로 빼지 않는다)
+function cumSeries(keyFn){
+  const by = {};
+  for (const e of D.events) (by[keyFn(e)] ||= []).push(e);
   const out = {};
-  for (const [k, arr] of Object.entries(steps)){
-    arr.sort((a,b)=>a[0]-b[0]);
-    let s = 0; const pts = [];
-    for (const [t,d] of arr){ s += d; if (pts.length && pts[pts.length-1].x === t*1000) pts[pts.length-1].y = s; else pts.push({x:t*1000, y:s}); }
-    pts.push({x: D.checked*1000, y: s});
-    out[k] = pts;
+  for (const [k, arr] of Object.entries(by)){
+    arr.sort((a,b)=>a.t-b.t); let s = 0; const pts = [{x:t0()*1000, y:0}];
+    for (const e of arr){ s += e.dmg; if (pts.at(-1).x === e.t*1000) pts.at(-1).y = s; else pts.push({x:e.t*1000, y:s}); }
+    pts.push({x:D.checked*1000, y:s}); out[k] = pts;
   }
   return out;
 }
-
-function renderChart(){
+function buildDmgChart(){
   let sets;
   if (mode === "boss"){
-    const s = series(e=>e.b);
-    sets = bossOrder().filter(id=>s[id]).map(id=>({label:D.bosses[id].name, data:s[id], borderColor:bossColor(id), backgroundColor:bossColor(id)}));
+    const s = cumSeries(e=>nameOf(e.b));
+    sets = NAMES.filter(n=>s[n]).map(n=>({label:n, data:s[n], ...lineStyle(colorOf(n))}));
   } else if (mode === "member"){
-    const s = series(e=>e.m);
-    const ranked = Object.keys(s).sort((a,b)=>s[b].at(-1).y - s[a].at(-1).y);
-    sets = ranked.map((m,i)=>({label:m, data:s[m], hidden: selMember ? m!==selMember : i>=8,
-      borderColor:css(COLORS[i%COLORS.length]), backgroundColor:css(COLORS[i%COLORS.length])}));
+    const s = cumSeries(e=>e.m), ranked = Object.keys(s).sort((a,b)=>s[b].at(-1).y - s[a].at(-1).y);
+    sets = ranked.map((m,i)=>({label:m, data:s[m], hidden: selMember ? m!==selMember : i>=8, ...lineStyle(css(COLORS[i%COLORS.length]))}));
   } else {
-    const s = series(()=>"all");
-    sets = [{label:"전체", data:s.all||[], borderColor:css("--accent"), backgroundColor:css("--accent")}];
+    const s = cumSeries(()=>"전체");
+    sets = [{label:"전체", data:s["전체"]||[], ...lineStyle(css("--accent"))}];
   }
-  sets.forEach(d=>Object.assign(d,{stepped:true, pointRadius:2, borderWidth:2, fill:false}));
-  const grid = css("--line"), muted = css("--muted");
-  if (chart) chart.destroy();
-  chart = new Chart($("chart"), {
-    type:"line", data:{datasets:sets},
-    options:{responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:"nearest", intersect:false},
-      scales:{
-        x:{type:"linear", grid:{color:grid}, ticks:{color:muted, maxTicksLimit:8, callback:v=>tstr(v/1000)}},
-        y:{grid:{color:grid}, ticks:{color:muted, callback:v=>fmt(v)}, beginAtZero:true}},
-      plugins:{legend:{labels:{color:css("--fg"), boxWidth:12}},
-        tooltip:{callbacks:{title:it=>tstr(it[0].parsed.x/1000,true), label:it=>`${it.dataset.label}: ${fmt(it.parsed.y)}`}}}}
-  });
+  const opts = chartOpts(v=>fmt(v));
+  opts.plugins.tooltip.callbacks.label = it => `${it.dataset.label}: ${fmt(it.parsed.y)}`;
+  dmgChart?.destroy();
+  dmgChart = new Chart($("chart"), {type:"line", data:{datasets:sets}, plugins:[cursorPlugin], options:opts});
 }
 
-function renderTable(){
-  const ids = bossOrder(), rows = {};
-  for (const m of D.members) rows[m] = {m, n:0, total:0, ...Object.fromEntries(ids.map(i=>[i,0]))};
-  for (const e of live()){ const r = rows[e.m] ||= {m:e.m,n:0,total:0}; r.n++; r.total += e.dmg; r[e.b] = (r[e.b]||0) + e.dmg; }
+function renderTable(ev){
+  const rows = {};
+  for (const e of ev){
+    const r = rows[e.m] ||= {m:e.m, n:0, total:0}, k = nameOf(e.b);
+    r.n++; r.total += e.dmg; r[k] = (r[k]||0) + e.dmg;
+  }
   const list = Object.values(rows).sort((a,b)=> sortKey==="m" ? sortDir*a.m.localeCompare(b.m) : sortDir*((a[sortKey]||0)-(b[sortKey]||0)));
-  const head = [["#",null],["멤버","m"],["횟수","n"],["총 대미지","total"], ...ids.map(i=>[D.bosses[i].name.replace(/\s*\[.*\]/,""), i])];
-  $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${k??""}">${esc(h)}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
-    <tbody>${list.map((r,i)=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""}"><td>${i+1}</td><td>${esc(r.m)}</td><td>${r.n}</td><td>${fmt(r.total)}</td>${ids.map(id=>`<td>${r[id]?fmt(r[id]):""}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  const head = [["#",null],["멤버","m"],["횟수","n"],["총 대미지","total"], ...NAMES.map(n=>[short(n), n])];
+  $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${esc(k??"")}">${esc(h)}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
+    <tbody>${list.length ? list.map((r,i)=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""}"><td>${i+1}</td><td>${esc(r.m)}</td><td>${r.n}</td><td>${fmt(r.total)}</td>${NAMES.map(n=>`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
+      : `<tr><td colspan="${head.length}" class="muted" style="text-align:left">아직 기록이 없어요.</td></tr>`}</tbody>`;
 }
 
-function renderFeed(){
-  const ev = D.events.filter(e=>!selMember || e.m===selMember).slice().sort((a,b)=>b.t-a.t);
-  $("feedf").innerHTML = selMember ? `— ${esc(selMember)} <a href="#" id="clr">전체 보기</a>` : "";
-  $("feed").innerHTML = ev.length ? ev.map(e=>`<div class="ev ${e.gone?"gone":""}" style="--bc:${bossColor(e.b)}" title="${e.gone?"이후 더 높은 기록으로 갱신됨":""}">
-      <span class="t">${e.pre?"시작 전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
-      <span class="b"><span class="dot"></span>${esc(D.bosses[e.b]?.name||e.b)}${e.fh?" 🎯":""}</span>
+function renderFeed(ev, t){
+  const items = ev.filter(e=>!selMember || e.m===selMember).map(e=>({t:e.t, e}));
+  if (!selMember) for (const u of levelUps().slice(1)) if (u.t <= t) items.push({t:u.t, lv:u.lv});
+  items.sort((a,b)=>b.t-a.t || (a.lv ? -1 : 1));
+  $("feedf").innerHTML = (T != null ? `— ${tstr(t)}까지` : "") + (selMember ? ` · ${esc(selMember)} <a href="#" id="clr">전체 보기</a>` : "");
+  $("feed").innerHTML = items.length ? items.map(({e, lv})=> lv
+      ? `<div class="ev lvup">▲ Lv.${lv - 1} 클리어 → Lv.${lv} 시작</div>`
+      : `<div class="ev ${e.gone && e.gone <= t ?"gone":""} ${e.t > t - STEP ? "new" : ""}" style="--bc:${colorOf(nameOf(e.b))}" title="${e.gone && e.gone<=t?"이후 같은 멤버의 더 높은 기록으로 갱신됨":""}">
+      <span class="t">${e.pre?"이전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
+      <span class="b"><span class="dot"></span>Lv.${e.lv} ${esc(short(nameOf(e.b)))}${e.fh?" 🎯":""}</span>
       <span class="d">${fmt(e.dmg)}</span></div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
-  $("clr")?.addEventListener("click", ev=>{ev.preventDefault(); selMember=null; renderTable(); renderFeed(); if(mode==="member") renderChart();});
+  $("clr")?.addEventListener("click", x=>{x.preventDefault(); selMember=null; renderAt(); if(mode==="member") buildDmgChart();});
 }
 
 $("mode").addEventListener("click", e=>{
   const b = e.target.closest("button"); if (!b) return;
-  mode = b.dataset.v; [...$("mode").children].forEach(x=>x.classList.toggle("on", x===b)); renderChart();
+  mode = b.dataset.v; [...$("mode").children].forEach(x=>x.classList.toggle("on", x===b)); buildDmgChart();
 });
 $("mt").addEventListener("click", e=>{
   const th = e.target.closest("th");
-  if (th){ const k = th.dataset.k; if (!k) return; sortDir = k===sortKey ? -sortDir : (k==="m"?1:-1); sortKey = k; renderTable(); return; }
+  if (th){ const k = th.dataset.k; if (!k) return; sortDir = k===sortKey ? -sortDir : (k==="m"?1:-1); sortKey = k; renderAt(); return; }
   const tr = e.target.closest("tr[data-m]"); if (!tr) return;
-  selMember = selMember===tr.dataset.m ? null : tr.dataset.m; renderTable(); renderFeed(); if (mode==="member") renderChart();
+  selMember = selMember===tr.dataset.m ? null : tr.dataset.m; renderAt(); if (mode==="member") buildDmgChart();
 });
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>D && render());
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>D && renderAll());
 
 async function tick(){
-  try { D = await load(); $("err").style.display="none"; render(); }
+  if (playTimer) return;   // 재생 중엔 새로 불러오지 않는다
+  try { D = await load(); $("err").style.display="none"; renderAll(); }
   catch(e){ $("err").style.display="block"; $("err").textContent = `데이터를 불러오지 못했어요: ${e.message}`; }
 }
 tick(); setInterval(tick, REFRESH_MS);
