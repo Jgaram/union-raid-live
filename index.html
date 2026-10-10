@@ -405,6 +405,7 @@ function renderTable(ev){
     if (roster && !roster.has(e.m)) continue;
     const r = rows[e.m] ||= {m:e.m, n:0, total:0}, k = nameOf(e.b);
     r.n++; r.total += e.dmg; r[k] = (r[k]||0) + e.dmg;
+    if (e.fh) (r.fh ||= {})[k] = (r.fh[k]||0) + 1;
   }
   // 레벨: 명단의 현재 싱크로 레벨, 없으면 마지막 공격 당시 레벨
   for (const r of Object.values(rows)) r.slv = D.levels?.[r.m] ?? lvOf(r.m, ev);
@@ -413,7 +414,7 @@ function renderTable(ev){
   // [제목 HTML, 정렬 키]
   const head = [["멤버","m"],["레벨","slv"],["횟수","n"],["총 대미지","total"], ...NAMES.map(n=>[icon(n) || esc(short(n)), n])];
   $("mt").innerHTML = `<thead><tr>${head.map(([h,k])=>`<th data-k="${esc(k??"")}">${h}${k===sortKey?(sortDir<0?" ▼":" ▲"):""}</th>`).join("")}</tr></thead>
-    <tbody>${list.length ? list.map(r=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""} ${r.n?"":"none"}"><td>${esc(r.m)}</td><td>${r.slv ?? "-"}</td><td>${r.n}</td><td>${r.n?fmt(r.total):"-"}</td>${NAMES.map(n=>`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
+    <tbody>${list.length ? list.map(r=>`<tr data-m="${esc(r.m)}" class="${r.m===selMember?"sel":""} ${r.n?"":"none"}"><td>${esc(r.m)}</td><td>${r.slv ?? "-"}</td><td>${r.n}</td><td>${r.n?fmt(r.total):"-"}</td>${NAMES.map(n=>r.fh?.[n]?`<td class="ok" title="막타 ${r.fh[n]}회 포함">${fmt(r[n])}</td>`:`<td>${r[n]?fmt(r[n]):""}</td>`).join("")}</tr>`).join("")
       : `<tr><td colspan="${head.length}" class="muted" style="text-align:left">아직 기록이 없어요.</td></tr>`}</tbody>`;
 }
 
