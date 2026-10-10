@@ -94,6 +94,7 @@ tbody tr{cursor:pointer}
 .ev{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;align-items:center}
 .ev .t{color:var(--muted);width:46px;flex:none;font-size:12px}
 .ev .m{width:58px;flex:none;font-weight:600}
+.ev .sl{width:30px;flex:none;color:var(--muted);font-size:12px;text-align:right}
 .ev .b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ev .d{flex:none;font-weight:600}
 .ev.gone .d{text-decoration:line-through;opacity:.6}
@@ -442,7 +443,7 @@ function renderFeed(ev, t){
   $("feed").innerHTML = items.length ? items.map(({e, lv})=> lv
       ? `<div class="ev lvup">▲ Lv.${lv - 1} 클리어 → Lv.${lv} 시작</div>`
       : `<div class="ev ${e.gone && e.gone <= t ?"gone":""} ${e.t > t - STEP ? "new" : ""}" style="--bc:${colorOf(nameOf(e.b))}" title="${e.gone && e.gone<=t?"이후 같은 멤버의 더 높은 기록으로 갱신됨":""}">
-      <span class="t">${e.pre?"이전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span>
+      <span class="t">${e.pre?"이전":tstr(e.t)}</span><span class="m">${esc(e.m)}</span><span class="sl" title="싱크로 레벨">${e.slv ?? D.levels?.[e.m] ?? ""}</span>
       <span class="b">Lv.${e.lv} ${bossLabel(nameOf(e.b))}${e.fh?` <b class="ok">🎯막타</b>`:""}</span>
       <span class="d">${fmt(e.dmg)}</span>${squad(e)}</div>`).join("") : `<p class="muted">아직 기록이 없어요.</p>`;
   $("clr")?.addEventListener("click", x=>{x.preventDefault(); selMember=null; selElems.clear(); renderAt();});
