@@ -105,6 +105,8 @@ tbody tr{cursor:pointer}
 .ev.lvup{justify-content:center;color:var(--accent);font-weight:600;font-size:12px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
 .grid2{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:14px}
+/* 데스크톱: 피드 칸은 멤버별 표 높이에 맞춰 늘어나고, 넘치면 그 안에서 스크롤 */
+@media (min-width:761px){.grid2>.card{display:flex;flex-direction:column}.grid2 .feed{flex:1;contain:size;min-height:300px;max-height:none}}
 @media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}.chartwrap{height:240px}.tb-hide{display:none}}
 #err,#demo{display:none}
 .demo{border:2px solid var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--card))}
@@ -317,7 +319,7 @@ function renderAt(){
     const name = nameOf(id), cur = snap.hp[id], mx = maxOf(snap,id), pct = mx ? cur/mx*100 : 0;
     const mine = ev.filter(e=>nameOf(e.b)===name), atLv = mine.filter(e=>e.lv===curLv);
     return `<div class="boss ${cur===0?"dead":""}" style="--bc:${colorOf(name)}">
-      <div class="nm"><span>${D.bosses[id]?.step ? D.bosses[id].step + "번 · " : ""}${bossLabel(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
+      <div class="nm"><span>${bossLabel(name)}</span><span>${cur===0?"처치":pct.toFixed(1)+"%"}</span></div>
       <div class="hpbar"><i style="width:${pct}%"></i></div>
       <div class="row"><span>남은 HP</span><span>${fmt(cur)} / ${fmt(mx)}</span></div>
       <div class="row"><span>이번 레벨</span><span>${atLv.length}회 · ${fmt(atLv.reduce((s,e)=>s+e.dmg,0))}</span></div>
